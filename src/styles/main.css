@@ -170,6 +170,21 @@ body {
     word-break: break-word;
 }
 
+.read-more-button {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 0.9em;
+    font-weight: 600;
+    padding: 0;
+    cursor: pointer;
+}
+
+.read-more-button:hover {
+    text-decoration: underline;
+}
+
 .card-actions {
     display: flex;
     gap: 10px;

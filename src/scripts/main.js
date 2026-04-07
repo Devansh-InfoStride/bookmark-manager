@@ -9,6 +9,7 @@ const bookmarksDisplay = document.getElementById('bookmarks-display');
 
 // Locall Memory - state memory for bookmarks
 let bookmarks = [];
+const DESCRIPTION_PREVIEW_LENGTH = 50;
 
 // Load bookmarks from localStorage on page load
 function loadBookmarks() {
@@ -91,13 +92,22 @@ function createBookmarkCard(bookmark) {
     card.className = 'bookmark-card';
 
     const faviconUrl = getFaviconUrl(bookmark.url);
+    const descriptionText = bookmark.description ? bookmark.description.trim() : '';
+    const isLongDescription = descriptionText.length > DESCRIPTION_PREVIEW_LENGTH;
+    const shortDescription = isLongDescription
+        ? `${descriptionText.slice(0, DESCRIPTION_PREVIEW_LENGTH)}...`
+        : descriptionText;
 
     card.innerHTML = `
         <div class="card-header">
             <img src="${faviconUrl}" alt="favicon" class="card-favicon" onerror="this.style.display='none'">
             <h3 class="card-title">${escapeHtml(bookmark.name)}</h3>
         </div>
-        ${bookmark.description ? `<p class="card-description">${escapeHtml(bookmark.description)}</p>` : ''}
+        
+        ${descriptionText ? `
+            <p class="card-description" data-full="${escapeHtml(descriptionText)}" data-short="${escapeHtml(shortDescription)}">${escapeHtml(shortDescription)}</p>
+            ${isLongDescription ? '<button class="read-more-button" onclick="toggleDescription(this)">Read more</button>' : ''}
+        ` : ''}
         <div class="card-actions">
             <button class="open-button" onclick="openBookmark('${bookmark.url}')">Open</button>
             <button class="delete-button" onclick="deleteBookmark(${bookmark.id})">Delete</button>
@@ -118,6 +128,27 @@ function deleteBookmark(id) {
         bookmarks = bookmarks.filter(bookmark => bookmark.id !== id);
         saveBookmarks();
         renderBookmarks();
+    }
+}
+
+// Toggle long description between preview and full text
+function toggleDescription(button) {
+    const descriptionEl = button.previousElementSibling;
+
+    if (!descriptionEl || !descriptionEl.classList.contains('card-description')) {
+        return;
+    }
+
+    const isExpanded = button.dataset.expanded === 'true';
+
+    if (isExpanded) {
+        descriptionEl.textContent = descriptionEl.dataset.short || '';
+        button.textContent = 'Read more';
+        button.dataset.expanded = 'false';
+    } else {
+        descriptionEl.textContent = descriptionEl.dataset.full || '';
+        button.textContent = 'Read less';
+        button.dataset.expanded = 'true';
     }
 }
 

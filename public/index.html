@@ -3,9 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Bookmark Manager</title>
+    <link rel="stylesheet" href="../src/styles/main.css">
 </head>
 <body>
-    
+    <div class="header">
+        <h1>Bookmark Manager</h1>
+    </div>
+
+    <!-- INPUT FORM -->
+    <section class="form-section">
+        <div class="form-container">
+            <h2>Add New Bookmark</h2>
+            <form id="bookmark-form">
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="bookmark-name"
+                        placeholder="Enter bookmark name"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <input
+                        type="url"
+                        id="bookmark-url"
+                        placeholder="Enter URL (e.g., https://example.com)"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <textarea
+                        id="bookmark-description"
+                        placeholder="Enter description"
+                        rows="3"
+                    ></textarea>
+                </div>
+                <button type="submit" class="add-button">Add Bookmark</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- BOOKMARKS DISPLAY -->
+    <section class="bookmarks-section">
+        <div class="bookmarks-container">
+            <h2>Your Bookmarks</h2>
+            <div id="bookmarks-display" class="bookmarks-grid">
+                <!-- Bookmark cards will be dynamically added here -->
+                <div class="empty-state">
+                    <p>No bookmarks yet. Add one to get started</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </body>
+<script src="../src/scripts/main.js"></script>
 </html>

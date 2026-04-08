@@ -63,18 +63,18 @@ form.addEventListener('submit', (e) => {
 });
 
 // Render all bookmarks
-function renderBookmarks() {
+function renderBookmarks(bookmarksToRender = bookmarks) {
     // Clear display
     bookmarksDisplay.innerHTML = '';
 
     // Show empty state if no bookmarks
-    if (bookmarks.length === 0) {
+    if (bookmarksToRender.length === 0) {
         bookmarksDisplay.innerHTML = '<div class="empty-state"><p>No bookmarks yet. Add one to get started! 🚀</p></div>';
         return;
     }
 
     // Create and add each bookmark card
-    bookmarks.forEach((bookmark) => {
+    bookmarksToRender.forEach((bookmark) => {
         const card = createBookmarkCard(bookmark);
         bookmarksDisplay.appendChild(card);
     });

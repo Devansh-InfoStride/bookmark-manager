@@ -110,6 +110,7 @@ function createBookmarkCard(bookmark) {
         ` : ''}
         <div class="card-actions">
             <button class="open-button" onclick="openBookmark('${bookmark.url}')">Open</button>
+            <button class="edit-button" onclick="openEditBookmarkModal(${bookmark.id})">Edit</button>
             <button class="delete-button" onclick="deleteBookmark(${bookmark.id})">Delete</button>
         </div>
     `;

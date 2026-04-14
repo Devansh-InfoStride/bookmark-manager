@@ -15,7 +15,10 @@ const DESCRIPTION_PREVIEW_LENGTH = 50;
 function loadBookmarks() {
     const saved = localStorage.getItem('bookmarks');
     if (saved) {
-        bookmarks = JSON.parse(saved);
+        bookmarks = JSON.parse(saved).map((bookmark) => ({
+            ...bookmark,
+            isPinned: Boolean(bookmark.isPinned)
+        }));
         renderBookmarks();
     }
 }
@@ -45,7 +48,8 @@ form.addEventListener('submit', (e) => {
         id: Date.now(),
         name: name,
         url: url,
-        description: description
+        description: description,
+        isPinned: false
     };
 
     
@@ -64,17 +68,21 @@ form.addEventListener('submit', (e) => {
 
 // Render all bookmarks
 function renderBookmarks(bookmarksToRender = bookmarks) {
+    const sortedBookmarks = typeof sortPinnedBookmarks === 'function'
+        ? sortPinnedBookmarks(bookmarksToRender)
+        : bookmarksToRender;
+
     // Clear display
     bookmarksDisplay.innerHTML = '';
 
     // Show empty state if no bookmarks
-    if (bookmarksToRender.length === 0) {
+    if (sortedBookmarks.length === 0) {
         bookmarksDisplay.innerHTML = '<div class="empty-state"><p>No bookmarks yet. Add one to get started! 🚀</p></div>';
         return;
     }
 
     // Create and add each bookmark card
-    bookmarksToRender.forEach((bookmark) => {
+    sortedBookmarks.forEach((bookmark) => {
         const card = createBookmarkCard(bookmark);
         bookmarksDisplay.appendChild(card);
     });
@@ -92,6 +100,9 @@ function createBookmarkCard(bookmark) {
     card.className = 'bookmark-card';
 
     const faviconUrl = getFaviconUrl(bookmark.url);
+    const pinButton = typeof getPinBookmarkButtonMarkup === 'function'
+        ? getPinBookmarkButtonMarkup(bookmark)
+        : '';
     const descriptionText = bookmark.description ? bookmark.description.trim() : '';
     const isLongDescription = descriptionText.length > DESCRIPTION_PREVIEW_LENGTH;
     const shortDescription = isLongDescription
@@ -99,9 +110,13 @@ function createBookmarkCard(bookmark) {
         : descriptionText;
 
     card.innerHTML = `
+        ${bookmark.isPinned ? '<div class="pin-badge">Important</div>' : ''}
         <div class="card-header">
-            <img src="${faviconUrl}" alt="favicon" class="card-favicon" onerror="this.style.display='none'">
-            <h3 class="card-title">${escapeHtml(bookmark.name)}</h3>
+            <div class="card-title-group">
+                <img src="${faviconUrl}" alt="favicon" class="card-favicon" onerror="this.style.display='none'">
+                <h3 class="card-title">${escapeHtml(bookmark.name)}</h3>
+            </div>
+            ${pinButton}
         </div>
         
         ${descriptionText ? `

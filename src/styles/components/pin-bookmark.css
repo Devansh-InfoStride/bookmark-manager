@@ -1,0 +1,56 @@
+.card-header {
+    justify-content: space-between;
+}
+
+.card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.pin-button {
+    border: 1px solid #d8dbea;
+    background: #ffffff;
+    color: #47507a;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.pin-button:hover {
+    border-color: #667eea;
+    color: #667eea;
+    transform: translateY(-1px);
+}
+
+.pin-button.is-pinned {
+    background: #667eea;
+    border-color: #667eea;
+    color: #ffffff;
+}
+
+.pin-badge {
+    display: inline-block;
+    margin-bottom: 4px;
+    background: #f0f3ff;
+    color: #3e4a86;
+    border: 1px solid #dce2ff;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: fit-content;
+}
+
+@media (max-width: 520px) {
+    .pin-button {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+}

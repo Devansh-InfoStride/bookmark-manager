@@ -22,10 +22,11 @@
         const tooltip = isPinned ? 'Unpin this bookmark' : 'Pin this bookmark';
         const label = isPinned ? 'Pinned' : 'Pin';
         const pinnedClass = isPinned ? 'is-pinned' : '';
+        const safeBookmarkId = String(bookmark.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
         let html = template;
         html = replaceToken(html, '__PINNED_CLASS__', pinnedClass);
-        html = replaceToken(html, '__BOOKMARK_ID__', bookmark.id);
+        html = replaceToken(html, '__BOOKMARK_ID__', `'${safeBookmarkId}'`);
         html = replaceToken(html, '__PIN_ARIA_LABEL__', ariaLabel);
         html = replaceToken(html, '__PIN_TOOLTIP__', tooltip);
         html = replaceToken(html, '__PIN_LABEL__', label);
@@ -34,7 +35,8 @@
 
     async function loadPinButtonTemplate() {
         try {
-            const response = await fetch('../src/pages/pin-bookmark-button.html');
+            const templateUrl = new URL('./pages/pin-bookmark-button.html', window.location.href);
+            const response = await fetch(templateUrl);
             if (!response.ok) {
                 return;
             }
@@ -51,23 +53,32 @@
         return [...list].sort((a, b) => Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned)));
     }
 
-    function togglePinBookmark(id) {
+    async function togglePinBookmark(id) {
         if (!Array.isArray(bookmarks)) {
             return;
         }
 
-        const index = bookmarks.findIndex((bookmark) => bookmark.id === id);
+        const index = bookmarks.findIndex((bookmark) => String(bookmark.id) === String(id));
         if (index === -1) {
             return;
         }
 
-        bookmarks[index] = {
-            ...bookmarks[index],
-            isPinned: !bookmarks[index].isPinned
-        };
+        const currentBookmark = bookmarks[index];
 
-        if (typeof saveBookmarks === 'function') {
-            saveBookmarks();
+        if (typeof patchBookmarkById === 'function') {
+            try {
+                bookmarks[index] = await patchBookmarkById(id, {
+                    isPinned: !currentBookmark.isPinned
+                });
+            } catch (error) {
+                alert(error.message || 'Failed to update bookmark.');
+                return;
+            }
+        } else {
+            bookmarks[index] = {
+                ...currentBookmark,
+                isPinned: !currentBookmark.isPinned
+            };
         }
 
         if (typeof filterItems === 'function') {

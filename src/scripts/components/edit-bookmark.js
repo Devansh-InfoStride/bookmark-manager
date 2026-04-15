@@ -42,7 +42,7 @@
             return;
         }
 
-        const bookmark = bookmarks.find((item) => item.id === id);
+        const bookmark = bookmarks.find((item) => String(item.id) === String(id));
         if (!bookmark) {
             return;
         }
@@ -73,7 +73,7 @@
             }
         });
 
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
             if (editingBookmarkId === null) {
@@ -89,19 +89,30 @@
                 return;
             }
 
-            const index = bookmarks.findIndex((item) => item.id === editingBookmarkId);
+            const index = bookmarks.findIndex((item) => String(item.id) === String(editingBookmarkId));
             if (index === -1) {
                 return;
             }
 
-            bookmarks[index] = {
-                ...bookmarks[index],
-                name: nextName,
-                url: normalizedUrl,
-                description: nextDescription
-            };
-
-            saveBookmarks();
+            if (typeof patchBookmarkById === 'function') {
+                try {
+                    bookmarks[index] = await patchBookmarkById(editingBookmarkId, {
+                        name: nextName,
+                        url: normalizedUrl,
+                        description: nextDescription
+                    });
+                } catch (error) {
+                    alert(error.message || 'Failed to update bookmark.');
+                    return;
+                }
+            } else {
+                bookmarks[index] = {
+                    ...bookmarks[index],
+                    name: nextName,
+                    url: normalizedUrl,
+                    description: nextDescription
+                };
+            }
 
             if (typeof filterItems === 'function') {
                 filterItems();
@@ -120,7 +131,8 @@
         }
 
         try {
-            const response = await fetch('../src/pages/edit-bookmark-modal.html');
+            const templateUrl = new URL('./pages/edit-bookmark-modal.html', window.location.href);
+            const response = await fetch(templateUrl);
             if (!response.ok) {
                 return false;
             }

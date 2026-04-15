@@ -1,0 +1,159 @@
+body.modal-open {
+    overflow: hidden;
+}
+
+.edit-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 1000;
+}
+
+.edit-modal.is-open {
+    display: block;
+}
+
+.edit-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+.edit-modal__panel {
+    position: relative;
+    width: min(560px, calc(100vw - 32px));
+    margin: 10vh auto 0;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+    animation: editModalIn 180ms ease-out;
+}
+
+@keyframes editModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.edit-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.edit-modal__header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #2e3551;
+}
+
+.edit-modal__close {
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #5f6686;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.edit-form__group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.edit-form__group label {
+    font-size: 0.92rem;
+    color: #444b67;
+    font-weight: 600;
+}
+
+.edit-form__group input,
+.edit-form__group textarea {
+    border: 1px solid #d8dbea;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.edit-form__group input:focus,
+.edit-form__group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.16);
+}
+
+.edit-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.edit-cancel-button,
+.edit-save-button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-cancel-button {
+    background: #eef0f7;
+    color: #2d3555;
+}
+
+.edit-save-button {
+    background: linear-gradient(135deg, #667eea 20%, #764ba2 100%);
+    color: #ffffff;
+}
+
+.edit-button {
+    flex: 1;
+    padding: 10px 15px;
+    background: #00a66f;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 166, 111, 0.28);
+}
+
+@media (max-width: 640px) {
+    .edit-modal__panel {
+        margin-top: 5vh;
+        padding: 18px;
+    }
+
+    .edit-form__actions {
+        flex-direction: column;
+    }
+
+    .edit-cancel-button,
+    .edit-save-button {
+        width: 100%;
+    }
+}

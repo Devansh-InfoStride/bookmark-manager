@@ -1,0 +1,41 @@
+<div
+  id="edit-bookmark-modal"
+  class="edit-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="edit-bookmark-title"
+>
+  <div class="edit-modal__backdrop" data-close-edit-modal></div>
+
+  <div class="edit-modal__panel">
+    <div class="edit-modal__header">
+      <h3 id="edit-bookmark-title">Edit Bookmark</h3>
+      <button type="button" class="edit-modal__close" data-close-edit-modal aria-label="Close edit dialog">
+        x
+      </button>
+    </div>
+
+    <form id="edit-bookmark-form" class="edit-form">
+      <div class="edit-form__group">
+        <label for="edit-bookmark-name">Name</label>
+        <input id="edit-bookmark-name" type="text" required>
+      </div>
+
+      <div class="edit-form__group">
+        <label for="edit-bookmark-url">URL</label>
+        <input id="edit-bookmark-url" type="url" required>
+      </div>
+
+      <div class="edit-form__group">
+        <label for="edit-bookmark-description">Description</label>
+        <textarea id="edit-bookmark-description" rows="4"></textarea>
+      </div>
+
+      <div class="edit-form__actions">
+        <button type="button" class="edit-cancel-button" data-close-edit-modal>Cancel</button>
+        <button type="submit" class="edit-save-button">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>

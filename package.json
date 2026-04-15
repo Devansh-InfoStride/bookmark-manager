@@ -1,5 +1,13 @@
 {
-"name": "bookmark-manager",
-"private": true,
-"version": "1.0.0"
+	"name": "bookmark-manager",
+	"private": true,
+	"version": "1.0.0",
+	"scripts": {
+		"dev": "node server.js",
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"@neondatabase/serverless": "^1.0.2",
+		"dotenv": "^17.4.2"
+	}
 }

@@ -34,7 +34,8 @@
 
     async function loadPinButtonTemplate() {
         try {
-            const response = await fetch('/public/pages/pin-bookmark-button.html');
+            const templateUrl = new URL('./pages/pin-bookmark-button.html', window.location.href);
+            const response = await fetch(templateUrl);
             if (!response.ok) {
                 return;
             }

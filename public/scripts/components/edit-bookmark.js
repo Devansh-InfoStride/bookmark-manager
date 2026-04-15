@@ -120,7 +120,8 @@
         }
 
         try {
-            const response = await fetch('/public/pages/edit-bookmark-modal.html');
+            const templateUrl = new URL('./pages/edit-bookmark-modal.html', window.location.href);
+            const response = await fetch(templateUrl);
             if (!response.ok) {
                 return false;
             }

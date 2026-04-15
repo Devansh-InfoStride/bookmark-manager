@@ -1,5 +1,10 @@
 {
 "rewrites": [
-{ "source": "/", "destination": "/public/index.html" }
+{ "source": "/", "destination": "/public/index.html" },
+{ "source": "/styles/(.*)", "destination": "/public/styles/$1" },
+{ "source": "/scripts/(.*)", "destination": "/public/scripts/$1" },
+{ "source": "/pages/(.*)", "destination": "/public/pages/$1" },
+{ "source": "/manifest.json", "destination": "/public/manifest.json" },
+{ "source": "/favicon.ico", "destination": "/public/favicon.ico" }
 ]
 }

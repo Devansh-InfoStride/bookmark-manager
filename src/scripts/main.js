@@ -73,9 +73,10 @@ async function requestJson(path, options = {}) {
     return response.json();
 }
 
-async function loadBookmarks() {
+async function loadBookmarks(sort = 'date_desc') {
     try {
-        const rows = await requestJson(API_BASE_URL);
+        const url = sort ? `${API_BASE_URL}?sort=${encodeURIComponent(sort)}` : API_BASE_URL;
+        const rows = await requestJson(url);
         bookmarks = Array.isArray(rows) ? rows.map(normalizeBookmark) : [];
 
         if (typeof filterItems === 'function') {

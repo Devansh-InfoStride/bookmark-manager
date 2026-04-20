@@ -31,8 +31,27 @@ function normalizeBookmarkRow(row) {
     };
 }
 
-async function handleGet(res) {
-    const rows = await sql`
+async function handleGet(req, res) {
+    const { sort = 'date_desc' } = req.query || {};
+    let orderBy = 'is_pinned DESC, created_at DESC';
+
+    switch (sort) {
+        case 'name_asc':
+            orderBy = 'is_pinned DESC, name ASC';
+            break;
+        case 'name_desc':
+            orderBy = 'is_pinned DESC, name DESC';
+            break;
+        case 'date_asc':
+            orderBy = 'is_pinned DESC, created_at ASC';
+            break;
+        case 'date_desc':
+        default:
+            orderBy = 'is_pinned DESC, created_at DESC';
+            break;
+    }
+
+    const rows = await sql.query(`
         SELECT
             id,
             name,
@@ -40,8 +59,8 @@ async function handleGet(res) {
             COALESCE(description, '') AS description,
             is_pinned AS "isPinned"
         FROM bookmarks
-        ORDER BY is_pinned DESC, created_at DESC
-    `;
+        ORDER BY ${orderBy}
+    `);
 
     return res.status(200).json(rows.map(normalizeBookmarkRow));
 }
@@ -77,7 +96,7 @@ async function handlePost(req, res) {
 module.exports = async function handler(req, res) {
     try {
         if (req.method === 'GET') {
-            return await handleGet(res);
+            return await handleGet(req, res);
         }
 
         if (req.method === 'POST') {

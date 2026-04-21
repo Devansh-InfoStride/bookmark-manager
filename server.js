@@ -62,8 +62,29 @@ function parseBody(req) {
 }
 
 async function handleBookmarksCollection(req, res) {
+    const requestUrl = new URL(req.url, `http://${req.headers.host}`);
+    const sortParam = requestUrl.searchParams.get('sort') || 'date_desc';
+
     if (req.method === 'GET') {
-        const rows = await sql`
+        let orderBy = 'is_pinned DESC, created_at DESC';
+        
+        switch (sortParam) {
+            case 'name_asc':
+                orderBy = 'is_pinned DESC, name ASC';
+                break;
+            case 'name_desc':
+                orderBy = 'is_pinned DESC, name DESC';
+                break;
+            case 'date_asc':
+                orderBy = 'is_pinned DESC, created_at ASC';
+                break;
+            case 'date_desc':
+            default:
+                orderBy = 'is_pinned DESC, created_at DESC';
+                break;
+        }
+
+        const rows = await sql.query(`
             SELECT
                 id,
                 name,
@@ -71,8 +92,8 @@ async function handleBookmarksCollection(req, res) {
                 COALESCE(description, '') AS description,
                 is_pinned AS "isPinned"
             FROM bookmarks
-            ORDER BY is_pinned DESC, created_at DESC
-        `;
+            ORDER BY ${orderBy}
+        `);
 
         sendJson(res, 200, rows.map(normalizeBookmarkRow));
         return;

@@ -1,0 +1,43 @@
+.sort-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: -10px 0 20px auto;
+    gap: 10px;
+    max-width: 1200px;
+    padding: 0;
+}
+
+.sort-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color, #333);
+}
+
+.sort-select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color, #ddd);
+    background-color: var(--bg-color, #fff);
+    color: var(--text-color, #333);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+}
+
+.sort-select:focus {
+    border-color: var(--primary-color, #007bff);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Dark mode adjustments if variables are used */
+[data-theme="dark"] .sort-label {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .sort-select {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+}

@@ -1,0 +1,57 @@
+/* Export Bookmark Button Styling */
+
+.export-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.export-button:hover {
+    background-color: #218838;
+}
+
+.export-button:active {
+    transform: translateY(1px);
+}
+
+.export-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Container for actions like Search, Sort, and Export */
+.actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.controls-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .actions-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .controls-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

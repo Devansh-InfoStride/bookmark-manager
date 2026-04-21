@@ -10,7 +10,7 @@ const bookmarkDescriptionInput = document.getElementById('bookmark-description')
 const bookmarksDisplay = document.getElementById('bookmarks-display');
 
 // In-memory state for bookmarks loaded from Neon
-let bookmarks = [];
+window.bookmarks = []; // Global state for all components
 const DESCRIPTION_PREVIEW_LENGTH = 50;
 
 function normalizeUrl(value) {
@@ -77,7 +77,7 @@ async function loadBookmarks(sort = 'date_desc') {
     try {
         const url = sort ? `${API_BASE_URL}?sort=${encodeURIComponent(sort)}` : API_BASE_URL;
         const rows = await requestJson(url);
-        bookmarks = Array.isArray(rows) ? rows.map(normalizeBookmark) : [];
+        window.bookmarks = Array.isArray(rows) ? rows.map(normalizeBookmark) : [];
 
         if (typeof filterItems === 'function') {
             filterItems();
@@ -91,7 +91,7 @@ async function loadBookmarks(sort = 'date_desc') {
 
 // Preserved for existing component compatibility.
 function saveBookmarks() {
-    return bookmarks;
+    return window.bookmarks;
 }
 
 async function patchBookmarkById(id, payload) {
@@ -130,7 +130,7 @@ form.addEventListener('submit', async (e) => {
             })
         });
 
-        bookmarks.unshift(normalizeBookmark(created));
+        window.bookmarks.unshift(normalizeBookmark(created));
         form.reset();
 
         if (typeof filterItems === 'function') {
@@ -144,7 +144,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 // Render all bookmarks
-function renderBookmarks(bookmarksToRender = bookmarks) {
+function renderBookmarks(bookmarksToRender = window.bookmarks) {
     const sortedBookmarks = typeof sortPinnedBookmarks === 'function'
         ? sortPinnedBookmarks(bookmarksToRender)
         : bookmarksToRender;
@@ -225,7 +225,7 @@ async function deleteBookmark(id) {
                 method: 'DELETE'
             });
 
-            bookmarks = bookmarks.filter(bookmark => String(bookmark.id) !== String(id));
+            window.bookmarks = window.bookmarks.filter(bookmark => String(bookmark.id) !== String(id));
 
             if (typeof filterItems === 'function') {
                 filterItems();

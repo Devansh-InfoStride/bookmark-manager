@@ -1,4 +1,5 @@
 const { sql } = require('../_lib/db');
+const verifyToken = require('../_lib/auth');
 
 function sendMethodNotAllowed(res) {
     res.setHeader('Allow', 'GET, POST');
@@ -31,7 +32,7 @@ function normalizeBookmarkRow(row) {
     };
 }
 
-async function handleGet(req, res) {
+async function handleGet(req, res, user) {
     const { sort = 'date_desc' } = req.query || {};
     let orderBy = 'is_pinned DESC, created_at DESC';
 
@@ -59,13 +60,14 @@ async function handleGet(req, res) {
             COALESCE(description, '') AS description,
             is_pinned AS "isPinned"
         FROM bookmarks
+        WHERE user_id = $1
         ORDER BY ${orderBy}
-    `);
+    `, [user.userId]);
 
     return res.status(200).json(rows.map(normalizeBookmarkRow));
 }
 
-async function handlePost(req, res) {
+async function handlePost(req, res, user) {
     const body = parseBody(req);
     const name = typeof body.name === 'string' ? body.name.trim() : '';
     const url = typeof body.url === 'string' ? body.url.trim() : '';
@@ -78,8 +80,8 @@ async function handlePost(req, res) {
 
     const rows = await sql.query(
         `
-            INSERT INTO bookmarks (name, url, description, is_pinned)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO bookmarks (name, url, description, is_pinned, user_id)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING
                 id,
                 name,
@@ -87,7 +89,7 @@ async function handlePost(req, res) {
                 COALESCE(description, '') AS description,
                 is_pinned AS "isPinned"
         `,
-        [name, url, description, isPinned]
+        [name, url, description, isPinned, user.userId]
     );
 
     return res.status(201).json(normalizeBookmarkRow(rows[0]));
@@ -95,16 +97,24 @@ async function handlePost(req, res) {
 
 module.exports = async function handler(req, res) {
     try {
+        let user;
+        try {
+            user = verifyToken(req);
+        } catch (authError) {
+            return res.status(401).json({ error: authError.message });
+        }
+
         if (req.method === 'GET') {
-            return await handleGet(req, res);
+            return await handleGet(req, res, user);
         }
 
         if (req.method === 'POST') {
-            return await handlePost(req, res);
+            return await handlePost(req, res, user);
         }
 
         return sendMethodNotAllowed(res);
     } catch (error) {
+        console.error('API Error:', error);
         return res.status(500).json({ error: 'Database request failed.' });
     }
 };

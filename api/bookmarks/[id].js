@@ -1,4 +1,5 @@
 const { sql } = require('../_lib/db');
+const verifyToken = require('../_lib/auth');
 
 function sendMethodNotAllowed(res) {
     res.setHeader('Allow', 'PATCH, DELETE');
@@ -40,7 +41,7 @@ function getIdFromRequest(req) {
     return id;
 }
 
-async function handlePatch(req, res, id) {
+async function handlePatch(req, res, id, user) {
     const body = parseBody(req);
     const name = typeof body.name === 'string' ? body.name.trim() : null;
     const url = typeof body.url === 'string' ? body.url.trim() : null;
@@ -55,7 +56,7 @@ async function handlePatch(req, res, id) {
                 url = COALESCE($3, url),
                 description = COALESCE($4, description),
                 is_pinned = COALESCE($5, is_pinned)
-            WHERE id = $1
+            WHERE id = $1 AND user_id = $6
             RETURNING
                 id,
                 name,
@@ -63,7 +64,7 @@ async function handlePatch(req, res, id) {
                 COALESCE(description, '') AS description,
                 is_pinned AS "isPinned"
         `,
-        [id, name, url, description, isPinned]
+        [id, name, url, description, isPinned, user.userId]
     );
 
     if (rows.length === 0) {
@@ -73,14 +74,14 @@ async function handlePatch(req, res, id) {
     return res.status(200).json(normalizeBookmarkRow(rows[0]));
 }
 
-async function handleDelete(res, id) {
+async function handleDelete(res, id, user) {
     const rows = await sql.query(
         `
             DELETE FROM bookmarks
-            WHERE id = $1
+            WHERE id = $1 AND user_id = $2
             RETURNING id
         `,
-        [id]
+        [id, user.userId]
     );
 
     if (rows.length === 0) {
@@ -98,16 +99,24 @@ module.exports = async function handler(req, res) {
     }
 
     try {
+        let user;
+        try {
+            user = verifyToken(req);
+        } catch (authError) {
+            return res.status(401).json({ error: authError.message });
+        }
+
         if (req.method === 'PATCH') {
-            return await handlePatch(req, res, id);
+            return await handlePatch(req, res, id, user);
         }
 
         if (req.method === 'DELETE') {
-            return await handleDelete(res, id);
+            return await handleDelete(res, id, user);
         }
 
         return sendMethodNotAllowed(res);
     } catch (error) {
+        console.error('API Error:', error);
         return res.status(500).json({ error: 'Database request failed.' });
     }
 };

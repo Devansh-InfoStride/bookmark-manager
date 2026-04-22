@@ -2,6 +2,37 @@
 
 const API_BASE_URL = '/api/bookmarks';
 
+// --- AUTH HANDLING START ---
+function getAuthToken() {
+    // 1. Check URL hash for token (from login redirect)
+    const hash = window.location.hash;
+    if (hash && hash.includes('token=')) {
+        const token = hash.split('token=')[1].split('&')[0];
+        localStorage.setItem('token', token);
+        // Clear hash from URL without reloading
+        window.history.replaceState(null, null, window.location.pathname);
+        return token;
+    }
+    // 2. Check localStorage
+    return localStorage.getItem('token');
+}
+
+function handleAuthError() {
+    localStorage.removeItem('token');
+    // You should update this to your actual login project URL
+    const LOGIN_URL = 'https://loginwithreact.vercel.app/'; 
+    if (confirm('Session expired or unauthorized. Redirect to login?')) {
+        window.location.href = LOGIN_URL;
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    const LOGIN_URL = 'https://login-react-project.vercel.app/'; 
+    window.location.href = LOGIN_URL;
+}
+// --- AUTH HANDLING END ---
+
 // DOM Element Extractor
 const form = document.getElementById('bookmark-form');
 const bookmarkNameInput = document.getElementById('bookmark-name');
@@ -44,13 +75,25 @@ function escapeJsSingleQuote(value) {
 }
 
 async function requestJson(path, options = {}) {
+    const token = getAuthToken();
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(path, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        }
+        headers
     });
+
+    if (response.status === 401) {
+        handleAuthError();
+        throw new Error('Unauthorized');
+    }
 
     if (!response.ok) {
         let errorMessage = 'Request failed.';

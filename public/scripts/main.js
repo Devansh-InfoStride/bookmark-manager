@@ -2,6 +2,37 @@
 
 const API_BASE_URL = '/api/bookmarks';
 
+// --- AUTH HANDLING START ---
+function getAuthToken() {
+    // 1. Check URL hash for token (from login redirect)
+    const hash = window.location.hash;
+    if (hash && hash.includes('token=')) {
+        const token = hash.split('token=')[1].split('&')[0];
+        localStorage.setItem('token', token);
+        // Clear hash from URL without reloading
+        window.history.replaceState(null, null, window.location.pathname);
+        return token;
+    }
+    // 2. Check localStorage
+    return localStorage.getItem('token');
+}
+
+function handleAuthError() {
+    localStorage.removeItem('token');
+    // You should update this to your actual login project URL
+    const LOGIN_URL = 'https://loginwithreact.vercel.app/'; 
+    if (confirm('Session expired or unauthorized. Redirect to login?')) {
+        window.location.href = LOGIN_URL;
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    const LOGIN_URL = 'https://login-react-project.vercel.app/'; 
+    window.location.href = LOGIN_URL;
+}
+// --- AUTH HANDLING END ---
+
 // DOM Element Extractor
 const form = document.getElementById('bookmark-form');
 const bookmarkNameInput = document.getElementById('bookmark-name');
@@ -10,7 +41,7 @@ const bookmarkDescriptionInput = document.getElementById('bookmark-description')
 const bookmarksDisplay = document.getElementById('bookmarks-display');
 
 // In-memory state for bookmarks loaded from Neon
-let bookmarks = [];
+window.bookmarks = []; // Global state for all components
 const DESCRIPTION_PREVIEW_LENGTH = 50;
 
 function normalizeUrl(value) {
@@ -44,13 +75,25 @@ function escapeJsSingleQuote(value) {
 }
 
 async function requestJson(path, options = {}) {
+    const token = getAuthToken();
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(path, {
         ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        }
+        headers
     });
+
+    if (response.status === 401) {
+        handleAuthError();
+        throw new Error('Unauthorized');
+    }
 
     if (!response.ok) {
         let errorMessage = 'Request failed.';
@@ -77,7 +120,7 @@ async function loadBookmarks(sort = 'date_desc') {
     try {
         const url = sort ? `${API_BASE_URL}?sort=${encodeURIComponent(sort)}` : API_BASE_URL;
         const rows = await requestJson(url);
-        bookmarks = Array.isArray(rows) ? rows.map(normalizeBookmark) : [];
+        window.bookmarks = Array.isArray(rows) ? rows.map(normalizeBookmark) : [];
 
         if (typeof filterItems === 'function') {
             filterItems();
@@ -91,7 +134,7 @@ async function loadBookmarks(sort = 'date_desc') {
 
 // Preserved for existing component compatibility.
 function saveBookmarks() {
-    return bookmarks;
+    return window.bookmarks;
 }
 
 async function patchBookmarkById(id, payload) {
@@ -130,7 +173,7 @@ form.addEventListener('submit', async (e) => {
             })
         });
 
-        bookmarks.unshift(normalizeBookmark(created));
+        window.bookmarks.unshift(normalizeBookmark(created));
         form.reset();
 
         if (typeof filterItems === 'function') {
@@ -144,7 +187,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 // Render all bookmarks
-function renderBookmarks(bookmarksToRender = bookmarks) {
+function renderBookmarks(bookmarksToRender = window.bookmarks) {
     const sortedBookmarks = typeof sortPinnedBookmarks === 'function'
         ? sortPinnedBookmarks(bookmarksToRender)
         : bookmarksToRender;
@@ -225,7 +268,7 @@ async function deleteBookmark(id) {
                 method: 'DELETE'
             });
 
-            bookmarks = bookmarks.filter(bookmark => String(bookmark.id) !== String(id));
+            window.bookmarks = window.bookmarks.filter(bookmark => String(bookmark.id) !== String(id));
 
             if (typeof filterItems === 'function') {
                 filterItems();

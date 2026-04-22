@@ -10,10 +10,12 @@
     <link rel="stylesheet" href="./styles/components/pin-bookmark.css">
     <link rel="stylesheet" href="./styles/components/darkmode.css">
     <link rel="stylesheet" href="./styles/components/sort-bookmark.css">
+    <link rel="stylesheet" href="./styles/components/export-bookmark.css">
 </head>
 <body>
     <div class="header">
         <h1>Bookmark Manager</h1>
+        <button id="logout-btn" class="logout-button" onclick="logout()">Logout</button>
     </div>
 
     <!-- Dark Mode Button -->
@@ -21,10 +23,20 @@
         <button class ="theme-button" id="theme-toggle">Dark Mode</button>
     </div>
 
-    <!-- SEARCH Bar -->
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search items...">
-        <button id="searchBtn" type="button">Search</button>
+    <!-- ACTIONS CONTAINER (Search & Export) -->
+    <div class="actions-container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search items...">
+            <button id="searchBtn" type="button">Search</button>
+        </div>
+        <button class="export-button" onclick="exportToHTML()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export HTML
+        </button>
     </div>
 
     <!-- INPUT FORM -->
@@ -82,4 +94,5 @@
 <script src="./scripts/search.js"></script>
 <script src="./scripts/components/darkmode.js"></script>
 <script src="./scripts/components/sort-bookmark.js"></script>
+<script src="./scripts/components/export-bookmark.js"></script>
 </html>

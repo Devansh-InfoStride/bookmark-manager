@@ -52,7 +52,7 @@ async function handleGet(req, res, user) {
             break;
     }
 
-    const rows = await sql.query(`
+    const rows = await sql`
         SELECT
             id,
             name,
@@ -60,9 +60,9 @@ async function handleGet(req, res, user) {
             COALESCE(description, '') AS description,
             is_pinned AS "isPinned"
         FROM bookmarks
-        WHERE user_id = $1
-        ORDER BY ${orderBy}
-    `, [user.userId]);
+        WHERE user_id = ${user.userId}
+        ORDER BY is_pinned DESC, created_at DESC
+    `;
 
     return res.status(200).json(rows.map(normalizeBookmarkRow));
 }
@@ -78,19 +78,16 @@ async function handlePost(req, res, user) {
         return res.status(400).json({ error: 'Name and URL are required.' });
     }
 
-    const rows = await sql.query(
-        `
+    const rows = await sql`
             INSERT INTO bookmarks (name, url, description, is_pinned, user_id)
-            VALUES ($1, $2, $3, $4, $5)
+            VALUES (${name}, ${url}, ${description}, ${isPinned}, ${user.userId})
             RETURNING
                 id,
                 name,
                 url,
                 COALESCE(description, '') AS description,
                 is_pinned AS "isPinned"
-        `,
-        [name, url, description, isPinned, user.userId]
-    );
+        `;
 
     return res.status(201).json(normalizeBookmarkRow(rows[0]));
 }

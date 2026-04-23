@@ -34,35 +34,40 @@ function normalizeBookmarkRow(row) {
 
 async function handleGet(req, res, user) {
     const { sort = 'date_desc' } = req.query || {};
-    let orderBy = 'is_pinned DESC, created_at DESC';
-
-    switch (sort) {
-        case 'name_asc':
-            orderBy = 'is_pinned DESC, name ASC';
-            break;
-        case 'name_desc':
-            orderBy = 'is_pinned DESC, name DESC';
-            break;
-        case 'date_asc':
-            orderBy = 'is_pinned DESC, created_at ASC';
-            break;
-        case 'date_desc':
-        default:
-            orderBy = 'is_pinned DESC, created_at DESC';
-            break;
+    
+    // Default sorting
+    let rows;
+    
+    // Pinned bookmarks always come first
+    // We can't use dynamic identifiers for ORDER BY in tagged templates easily
+    // but we can switch based on the sort parameter
+    
+    if (sort === 'name_asc') {
+        rows = await sql`
+            SELECT id, name, url, COALESCE(description, '') AS description, is_pinned AS "isPinned"
+            FROM bookmarks WHERE user_id = ${user.userId}
+            ORDER BY is_pinned DESC, name ASC
+        `;
+    } else if (sort === 'name_desc') {
+        rows = await sql`
+            SELECT id, name, url, COALESCE(description, '') AS description, is_pinned AS "isPinned"
+            FROM bookmarks WHERE user_id = ${user.userId}
+            ORDER BY is_pinned DESC, name DESC
+        `;
+    } else if (sort === 'date_asc') {
+        rows = await sql`
+            SELECT id, name, url, COALESCE(description, '') AS description, is_pinned AS "isPinned"
+            FROM bookmarks WHERE user_id = ${user.userId}
+            ORDER BY is_pinned DESC, created_at ASC
+        `;
+    } else {
+        // date_desc (default)
+        rows = await sql`
+            SELECT id, name, url, COALESCE(description, '') AS description, is_pinned AS "isPinned"
+            FROM bookmarks WHERE user_id = ${user.userId}
+            ORDER BY is_pinned DESC, created_at DESC
+        `;
     }
-
-    const rows = await sql`
-        SELECT
-            id,
-            name,
-            url,
-            COALESCE(description, '') AS description,
-            is_pinned AS "isPinned"
-        FROM bookmarks
-        WHERE user_id = ${user.userId}
-        ORDER BY is_pinned DESC, created_at DESC
-    `;
 
     return res.status(200).json(rows.map(normalizeBookmarkRow));
 }

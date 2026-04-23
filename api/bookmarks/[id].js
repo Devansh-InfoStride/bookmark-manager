@@ -48,24 +48,21 @@ async function handlePatch(req, res, id, user) {
     const description = typeof body.description === 'string' ? body.description.trim() : null;
     const isPinned = typeof body.isPinned === 'boolean' ? body.isPinned : null;
 
-    const rows = await sql.query(
-        `
+    const rows = await sql`
             UPDATE bookmarks
             SET
-                name = COALESCE($2, name),
-                url = COALESCE($3, url),
-                description = COALESCE($4, description),
-                is_pinned = COALESCE($5, is_pinned)
-            WHERE id = $1 AND user_id = $6
+                name = COALESCE(${name}, name),
+                url = COALESCE(${url}, url),
+                description = COALESCE(${description}, description),
+                is_pinned = COALESCE(${isPinned}, is_pinned)
+            WHERE id = ${id} AND user_id = ${user.userId}
             RETURNING
                 id,
                 name,
                 url,
                 COALESCE(description, '') AS description,
                 is_pinned AS "isPinned"
-        `,
-        [id, name, url, description, isPinned, user.userId]
-    );
+        `;
 
     if (rows.length === 0) {
         return res.status(404).json({ error: 'Bookmark not found.' });
@@ -75,14 +72,11 @@ async function handlePatch(req, res, id, user) {
 }
 
 async function handleDelete(res, id, user) {
-    const rows = await sql.query(
-        `
+    const rows = await sql`
             DELETE FROM bookmarks
-            WHERE id = $1 AND user_id = $2
+            WHERE id = ${id} AND user_id = ${user.userId}
             RETURNING id
-        `,
-        [id, user.userId]
-    );
+        `;
 
     if (rows.length === 0) {
         return res.status(404).json({ error: 'Bookmark not found.' });
